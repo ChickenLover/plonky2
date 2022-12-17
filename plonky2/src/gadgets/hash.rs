@@ -1,6 +1,6 @@
 use crate::field::extension::Extendable;
 use crate::hash::hash_types::RichField;
-use crate::hash::hashing::SPONGE_WIDTH;
+use crate::hash::hashing::{SPONGE_WIDTH, SPONGE_RATE};
 use crate::iop::target::{BoolTarget, Target};
 use crate::plonk::circuit_builder::CircuitBuilder;
 use crate::plonk::config::AlgebraicHasher;
@@ -13,6 +13,19 @@ impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilder<F, D> {
         // We don't want to swap any inputs, so set that wire to 0.
         let _false = self._false();
         self.permute_swapped::<H>(inputs, _false)
+    }
+
+    pub fn permute_many<H: AlgebraicHasher<F>>(
+        &mut self,
+        state: [Target; SPONGE_WIDTH],
+        inputs: Vec<Target>,
+    ) -> [Target; SPONGE_WIDTH] {
+        let mut _state = state.clone();
+        for input_chunk in inputs.chunks(SPONGE_RATE) {
+            _state[..input_chunk.len()].copy_from_slice(input_chunk);
+            _state = self.permute::<H>(_state);
+        }
+        _state
     }
 
     /// Conditionally swap two chunks of the inputs (useful in verifying Merkle proofs), then apply
