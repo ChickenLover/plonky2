@@ -33,8 +33,8 @@ fn test_simple_transfer() -> anyhow::Result<()> {
     let to = hex!("a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0");
     let sender_state_key = keccak(sender);
     let to_state_key = keccak(to);
-    let sender_nibbles = Nibbles::from(sender_state_key);
-    let to_nibbles = Nibbles::from(to_state_key);
+    let sender_nibbles = Nibbles::from_bytes_be(sender_state_key.as_bytes()).unwrap();
+    let to_nibbles = Nibbles::from_bytes_be(to_state_key.as_bytes()).unwrap();
     let value = U256::from(100u32);
 
     let sender_account_before = AccountRlp {
@@ -104,7 +104,7 @@ fn test_simple_transfer() -> anyhow::Result<()> {
         expected_state_trie_after.calc_hash()
     );
 
-    verify_proof(all_stark, proof, &config)
+    verify_proof(&all_stark, proof, &config)
 }
 
 fn eth_to_wei(eth: U256) -> U256 {
