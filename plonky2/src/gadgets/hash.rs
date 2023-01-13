@@ -18,7 +18,7 @@ impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilder<F, D> {
     pub fn permute_many<H: AlgebraicHasher<F>>(
         &mut self,
         state: [Target; SPONGE_WIDTH],
-        inputs: Vec<Target>,
+        inputs: &[Target],
     ) -> [Target; SPONGE_WIDTH] {
         let mut _state = state.clone();
         for input_chunk in inputs.chunks(SPONGE_RATE) {
